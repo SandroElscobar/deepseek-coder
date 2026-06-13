@@ -81,12 +81,12 @@ ignore_missing_imports = false
 module = ["qasync.*"]
 ignore_missing_imports = true
 
-# Ваш код - максимальная строгость
+# Код - максимальная строгость
 [[tool.mypy.overrides]]
 module = "deepseek_coder.*"
 disallow_untyped_defs = true
 disallow_any_explicit = true
 no_implicit_optional = true
 strict_optional = true
-check_untyped_defs = true  # Добавьте для проверки нетипизированных функций
+check_untyped_defs = true
 warn_return_any = true
