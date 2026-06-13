@@ -1,0 +1,93 @@
+name: Build
+
+# Запускается когда создаётся новый тег вида v0.1.0
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    # Запускаем три параллельных job — по одному на каждую ОС
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+            artifact: "DeepSeek Coder"
+            archive: "DeepSeek-Coder-windows.zip"
+
+          - os: macos-latest
+            name: macos
+            artifact: "DeepSeek Coder"
+            archive: "DeepSeek-Coder-macos.zip"
+
+          - os: ubuntu-latest
+            name: linux
+            artifact: "DeepSeek Coder"
+            archive: "DeepSeek-Coder-linux.zip"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      # 1. Клонируем репозиторий
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Устанавливаем uv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      # 3. Устанавливаем зависимости через uv
+      - name: Install dependencies
+        run: uv sync --dev
+
+      # 4. Собираем через PyInstaller
+      - name: Build with PyInstaller
+        run: uv run pyinstaller "DeepSeek Coder.spec" --noconfirm
+
+      # 5. Упаковываем в zip (Windows)
+      - name: Archive (Windows)
+        if: matrix.name == 'windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist/DeepSeek Coder" -DestinationPath "${{ matrix.archive }}"
+
+      # 6. Упаковываем в zip (macOS / Linux)
+      - name: Archive (macOS/Linux)
+        if: matrix.name != 'windows'
+        run: |
+          cd dist
+          zip -r "../${{ matrix.archive }}" "DeepSeek Coder"
+
+      # 7. Загружаем артефакт — GitHub сохранит zip между job'ами
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archive }}
+          path: ${{ matrix.archive }}
+
+  # Отдельный job — создаёт Release и прикрепляет все три zip
+  release:
+    needs: build  # ждёт пока все три билда завершатся
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # нужно для создания Release
+
+    steps:
+      # Скачиваем все три артефакта
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      # Создаём GitHub Release и прикрепляем zip файлы
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            DeepSeek-Coder-windows.zip
+            DeepSeek-Coder-macos.zip
+            DeepSeek-Coder-linux.zip
+          generate_release_notes: true  # автоматически генерирует список изменений
