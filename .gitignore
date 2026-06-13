@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[oc]
+*.egg-info
+wheels/
+
+# Сборка
+build/
+dist/
+*.spec.bak
+
+# Virtual environments
+.venv
+
+# PyInstaller артефакты — в git не нужны, собираются через CI
+*.zip
+
+# База данных — личные данные пользователя
+*.db
+*.db-shm
+*.db-wal
+
+# Логи
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Секреты — на всякий случай
+.env
+*.env

@@ -1,0 +1,92 @@
+[project]
+name = "deepseek-coder"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Альховой Александр", email = "alhovoialexander@yandex.ru" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "keyring>=25.7.0",
+    "markdown-it-py>=4.2.0",
+    "mcp>=1.27.2",
+    "openai>=2.37.0",
+    "pygments>=2.20.0",
+    "pyqt6>=6.11.0",
+    "qasync>=0.28.0",
+    "qt-material>=2.17",
+]
+
+[project.scripts]
+deepseek-coder = "deepseek_coder:main"
+
+[build-system]
+requires = ["uv_build>=0.11.2,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.1.0",
+    "pyinstaller>=6.21.0",
+    "pyqt6-stubs>=20250824",
+    "ruff>=0.15.13",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E", # базовый PEP 8 и поиск синтаксических проблем
+    "W", # базовый PEP 8 и поиск синтаксических проблем
+    "F", # базовый PEP 8 и поиск синтаксических проблем
+    "I", # сортирует и группирует импорты по PEP 8 (стандартная библиотека → third-party → локальные)
+    "UP", # предлагает заменить устаревший синтаксис (Optional[int] → int | None, List[str] → list[str])
+    "B", # ловит типичные баги (например, мутируемый default argument, который один из самых распространённых "питон-сюрпризов")
+    "SIM" # предлагает упрощения вроде if x == True → if x
+]
+
+#uv run ruff format src/        # автоформат
+#uv run ruff check src/         # проверка
+#uv run ruff check --fix src/   # проверка + автофикс того, что можно автоматически
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+plugins = ["pydantic.mypy"]
+show_error_codes = true
+ignore_missing_imports = true
+pretty = true
+exclude = [
+    "^tests/",
+    "^docs/",
+    "setup.py",
+]
+
+# openai - имеет встроенные типы
+[[tool.mypy.overrides]]
+module = ["openai.*"]
+ignore_missing_imports = false
+
+# PyQt6 - стабы установлены
+[[tool.mypy.overrides]]
+module = ["PyQt6.*"]
+ignore_missing_imports = false
+
+# qasync - пока нет стабов
+[[tool.mypy.overrides]]
+module = ["qasync.*"]
+ignore_missing_imports = true
+
+# Ваш код - максимальная строгость
+[[tool.mypy.overrides]]
+module = "deepseek_coder.*"
+disallow_untyped_defs = true
+disallow_any_explicit = true
+no_implicit_optional = true
+strict_optional = true
+check_untyped_defs = true  # Добавьте для проверки нетипизированных функций
+warn_return_any = true
