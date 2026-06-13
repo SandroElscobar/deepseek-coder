@@ -146,6 +146,14 @@ uv run ruff format src/
 ```
 
 ---
+## Скачать
+
+| Платформа | Ссылка | 
+|-----------|--------|
+| 🪟 Windows | [DeepSeek-Coder-windows.zip](https://github.com/SandroElscobar/deepseek-coder/releases/latest/download/DeepSeek-Coder-windows.zip) |
+| 🍎 macOS | [DeepSeek-Coder-macos.zip](https://github.com/SandroElscobar/deepseek-coder/releases/latest/download/DeepSeek-Coder-macos.zip) |
+| 🐧 Linux | [DeepSeek-Coder-linux.zip](https://github.com/SandroElscobar/deepseek-coder/releases/latest/download/DeepSeek-Coder-linux.zip) |
+
 
 ## Лицензия
 
