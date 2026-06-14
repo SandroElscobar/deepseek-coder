@@ -6,7 +6,7 @@
 import json
 import logging
 
-from PyQt6.QtCore import QSettings, QByteArray
+from PyQt6.QtCore import QByteArray, QSettings
 
 from deepseek_coder.infrastructure.keyring_store import KeyringStore
 
@@ -60,16 +60,20 @@ class SettingsService:
     def set_mcp_servers(self, servers: list[dict[str, object]]) -> None:
         self._settings.setValue("mcp_servers", json.dumps(servers))
 
-    def get_window_geometry(self) -> QByteArray | bytes | bytearray:
-        return self._settings.value("window_geometry", defaultValue=None)
+    def get_window_geometry(self) -> QByteArray | None:
+        value = self._settings.value("window_geometry")
+        if isinstance(value, QByteArray):
+            return value
+        return None
 
     def set_window_geometry(self, geometry: QByteArray) -> None:
         self._settings.setValue("window_geometry", geometry)
 
     def get_splitter_state(self, name: str) -> QByteArray | None:
-        return self._settings.value(f"splitter_{name}", defaultValue=None)
+        value = self._settings.value(f"splitter_{name}")
+        if isinstance(value, QByteArray):
+            return value
+        return None
 
     def set_splitter_state(self, name: str, state: QByteArray) -> None:
         self._settings.setValue(f"splitter_{name}", state)
-
-

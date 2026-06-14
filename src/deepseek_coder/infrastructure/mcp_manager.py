@@ -104,7 +104,7 @@ class MCPManager:
         return None
 
     @property
-    def servers(self):
+    def servers(self) -> dict[str, _ServerState]:
         return self._servers
 
     async def stop_all(self) -> None:

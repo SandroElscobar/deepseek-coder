@@ -10,6 +10,7 @@ from pathlib import Path
 from PyQt6.QtCore import QFileSystemWatcher, Qt
 from PyQt6.QtGui import QCloseEvent, QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
+    QApplication,
     QComboBox,
     QFileDialog,
     QHBoxLayout,
@@ -21,7 +22,8 @@ from PyQt6.QtWidgets import (
 )
 from qasync import asyncClose, asyncSlot
 
-from deepseek_coder import ChatRepository, MCPManager
+from deepseek_coder.infrastructure.sqlite_repo import ChatRepository
+from deepseek_coder.infrastructure.mcp_manager import MCPManager
 from deepseek_coder.services.agents import AGENTS, get_agent
 from deepseek_coder.services.deepseek import TOOL_CALL_PREFIX, DeepSeekManager
 from deepseek_coder.services.history import ChatHistoryService
@@ -52,7 +54,7 @@ class MainWindow(QWidget):
         super().__init__()
         # Открытие настроек для API KEY
         shortcut = QShortcut(QKeySequence("Ctrl+,"), self)
-        self._current_task: asyncio.Task | None = None
+        self._current_task: asyncio.Task[None] | None = None
         self._watcher = QFileSystemWatcher(parent=self)
         self._watcher.fileChanged.connect(self.on_file_changed)
         self._manager = manager
@@ -130,7 +132,7 @@ class MainWindow(QWidget):
         self._file_tree.file_selected.connect(self._on_file_selected)
         self._restore_window_state()
 
-    @asyncSlot()
+    @asyncSlot() # type: ignore[untyped-decorator]
     async def on_submit_clicked(self) -> None:
         """Создает Task и переключает кнопку"""
         text = self._input_message.toPlainText().strip()
@@ -150,7 +152,6 @@ class MainWindow(QWidget):
             self._submit.clicked.disconnect()
             self._submit.clicked.connect(self.on_submit_clicked)
             self._current_task = None
-
 
     async def _run_chat(self, text: str) -> None:
         """Вся логика отправки сообщения"""
@@ -183,7 +184,7 @@ class MainWindow(QWidget):
         if self._current_task is not None:
             self._current_task.cancel()
 
-    @asyncSlot()
+    @asyncSlot() # type: ignore[untyped-decorator]
     async def on_open_settings(self) -> None:
         dialog = SettingsDialog(self._settings, parent=self)
         closed = asyncio.Event()
@@ -193,7 +194,7 @@ class MainWindow(QWidget):
         await closed.wait()
         logger.info("Настройки закрыты.")
 
-    @asyncSlot()
+    @asyncSlot() # type: ignore[untyped-decorator]
     async def on_open_project_clicked(self) -> None:
         path = QFileDialog.getExistingDirectory(self, "Открыть проект")
         if not path:
@@ -214,12 +215,12 @@ class MainWindow(QWidget):
         finally:
             self._open_project_btn.setEnabled(True)
 
-    @asyncSlot()
+    @asyncSlot() # type: ignore[untyped-decorator]
     async def on_new_chat_clicked(self) -> None:
         await self._manager.new_chat()
         self._chat_view.clear()
 
-    @asyncSlot(str)
+    @asyncSlot(str) # type: ignore[untyped-decorator]
     async def on_file_changed(self, path: str) -> None:
         """Файл изменился - сканируем проект."""
         self._watcher.addPath(path)
@@ -235,7 +236,7 @@ class MainWindow(QWidget):
         except Exception as exc:
             logger.error("Ошибка обновления контекста: %s", exc)
 
-    @asyncSlot(int)
+    @asyncSlot(int) # type: ignore[untyped-decorator]
     async def on_session_selected(self, session_id: int) -> None:
         """Пользователь выбрал сессию в боковой панели"""
         self._submit.setEnabled(False)
@@ -246,7 +247,7 @@ class MainWindow(QWidget):
         finally:
             self._submit.setEnabled(True)
 
-    @asyncSlot(int)
+    @asyncSlot(int) # type: ignore[untyped-decorator]
     async def on_session_deleted(self, session_id: int) -> None:
         """Пользователь удалил сессию"""
         is_current = session_id == self._history_service.session_id
@@ -291,13 +292,17 @@ class MainWindow(QWidget):
         ]  # noqa: E501
         return "\n\n".join(parts) or None
 
-    @asyncClose
+    @asyncClose # type: ignore[untyped-decorator]
     async def closeEvent(self, event: QCloseEvent) -> None:
         self._save_window_state()
         with contextlib.suppress(Exception):
             await self._mcp_manager.stop_all()
         with contextlib.suppress(Exception):
             await self._repo.close()
+
+        logger.info("Приложение остановлено")
+        if app:= QApplication.instance():
+            app.quit()
 
     def _save_window_state(self) -> None:
         self._settings.set_window_geometry(self.saveGeometry())

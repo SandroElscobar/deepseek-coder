@@ -23,7 +23,6 @@ async def main() -> None:
     print("=== Тест 1: обычный запрос ===")
     response = await manager.chat("Скажи только: 'Привет от DeepSeek'")
     print(f"Ответ: {response}")
-    print(f"Токены: {manager.total_tokens}")
 
     # Тест 2: streaming
     print("\n=== Тест 2: streaming ===")

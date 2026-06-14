@@ -131,7 +131,8 @@ class ChatRepository:
             row = await cursor.fetchone()
             if row is None:
                 return None
-            return row[0]
+            session_id = row[0]
+            return int(session_id) if session_id is not None else None
 
     async def list_sessions(self) -> list[SessionInfo]:
         """Получить все сессии с превью первого user-сообщения."""

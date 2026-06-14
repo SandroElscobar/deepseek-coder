@@ -21,8 +21,10 @@ class MessageInput(QTextEdit):
         # Убираем горизонтальный скролл, не нужен
         self.setLineWrapMode(QTextEdit.LineWrapMode.WidgetWidth)
 
-    def keyPressEvent(self, event: QKeyEvent | None = None) -> None:
+    def keyPressEvent(self, event: QKeyEvent | None) -> None:
         # Shift+Enter -> Обычный перенос строки (передаем в базовый класс)
+        if event is None:
+            return None
         if (
             event.key() == Qt.Key.Key_Return
             and event.modifiers() == Qt.KeyboardModifier.ShiftModifier

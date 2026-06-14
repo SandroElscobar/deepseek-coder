@@ -32,6 +32,7 @@ class ChatHistoryService:
         """Сохранить сообщение в текущей сессии"""
         if self._session_id is None:
             self._session_id = await self._repo.create_session()
+        assert self._session_id is not None
         await self._repo.save_message(session_id=self._session_id, role=role, content=content)
 
     @property

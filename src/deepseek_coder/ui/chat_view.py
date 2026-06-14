@@ -11,6 +11,7 @@ from PyQt6.QtGui import (
     QTextLength,
     QTextTableCellFormat,
     QTextTableFormat,
+    QTextTableCell,
 )
 from PyQt6.QtWidgets import (
     QTextBrowser,
@@ -82,6 +83,8 @@ class ChatView(QWidget):
         doc_cursor = self._browser.textCursor()
         doc_cursor.movePosition(QTextCursor.MoveOperation.End)
         table = doc_cursor.insertTable(1, 1, table_format)
+        # Валидация для mypy
+        assert table is not None, "insertTable returned None"
 
         # Применяем cell_format к единственной ячейки
         cell = table.cellAt(0, 0)
@@ -119,10 +122,13 @@ class ChatView(QWidget):
 
         self._stream_buffer += chunk
         bar = self._browser.verticalScrollBar()
-        was_at_bottom = bar.value() >= bar.maximum() - 4
-        self._stream_cursor.insertText(chunk)
-        if was_at_bottom:
-            bar.setValue(bar.maximum())
+        if bar is not None:
+            was_at_bottom = bar.value() >= bar.maximum() - 4
+            self._stream_cursor.insertText(chunk)
+            if was_at_bottom:
+                bar.setValue(bar.maximum())
+        else:
+            self._stream_cursor.insertText(chunk)
         return None
 
     def stop_assistant_message(self) -> None:
@@ -134,6 +140,12 @@ class ChatView(QWidget):
         # Если буфер пустой — удаляем пустой пузырёк целиком
         if not full_text.strip():
             table = self._stream_cursor.currentTable()
+            if table is None:
+                self._stream_cursor = None
+                self._stream_buffer = ""
+                return None
+            table.removeRows(0, table.rows())
+
             cursor = self._browser.textCursor()
             cursor.movePosition(QTextCursor.MoveOperation.End)
             # Выделяем и удаляем всю таблицу
@@ -143,7 +155,13 @@ class ChatView(QWidget):
             return None
 
         # Обычный путь — рендерим markdown
-        cell = self._stream_cursor.currentTable().cellAt(0, 0)
+        table = self._stream_cursor.currentTable()
+        if table is None:
+            logger.warning("No table found for stream cursor")
+            self._stream_cursor = None
+            self._stream_buffer = ""
+            return None
+        cell = table.cellAt(0, 0)
         start = cell.firstCursorPosition()
         end = cell.lastCursorPosition()
         clean_cursor = QTextCursor(start)
@@ -160,7 +178,8 @@ class ChatView(QWidget):
 
     def _scroll_to_bottom(self) -> None:
         bar = self._browser.verticalScrollBar()
-        bar.setValue(bar.maximum())
+        if bar is not None:
+            bar.setValue(bar.maximum())
 
     def clear(self) -> None:
         self._browser.clear()
@@ -180,7 +199,7 @@ class ChatView(QWidget):
             self._browser.setUpdatesEnabled(True)
         self._scroll_to_bottom()
 
-    def _recolor_cell(self, cell, color: QColor) -> None:
+    def _recolor_cell(self, cell: QTextTableCell, color: QColor) -> None:
         cursor = QTextCursor(cell.firstCursorPosition())
         cursor.setPosition(cell.lastCursorPosition().position(), QTextCursor.MoveMode.KeepAnchor)
         fmt = QTextCharFormat()

@@ -236,7 +236,7 @@ class SettingsDialog(QDialog):
         self._settings.set_theme(self._combo_theme.currentText())
         self.accept()
 
-    @asyncSlot()
+    @asyncSlot() # type: ignore[untyped-decorator]
     async def on_check_connect_clicked(self) -> None:
         api_key = self._api_key_input.text()
         if not api_key:

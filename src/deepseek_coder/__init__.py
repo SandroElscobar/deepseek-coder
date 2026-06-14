@@ -43,13 +43,11 @@ async def _main_coroutine(app: QApplication, settings: SettingsService) -> None:
     mcp_manager = MCPManager()
     for server_dict in settings.get_mcp_servers():
         try:
-            args = server_dict.get("args", [])
-            if not isinstance(args, list):
-                args = []
+            raw_args = server_dict.get("args", [])
             config = McpServerConfig(
                 name=str(server_dict["name"]),
                 command=str(server_dict["command"]),
-                args=list(server_dict.get("args", [])),
+                args=list(raw_args) if isinstance(raw_args, list) else [],
             )
             await mcp_manager.start_server(config)
             logger.info("MCP сервер запущен: %s", config.name)

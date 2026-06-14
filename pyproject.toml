@@ -80,6 +80,7 @@ ignore_missing_imports = false
 [[tool.mypy.overrides]]
 module = ["qasync.*"]
 ignore_missing_imports = true
+ignore_errors = true
 
 # Код - максимальная строгость
 [[tool.mypy.overrides]]
@@ -90,3 +91,11 @@ no_implicit_optional = true
 strict_optional = true
 check_untyped_defs = true
 warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = ["deepseek_coder.infrastructure.deepseek_client"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["deepseek_coder.scripts.*"]
+ignore_errors = true

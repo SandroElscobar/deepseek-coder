@@ -59,6 +59,6 @@ class FileViewer(QWidget):
             from pygments.formatters import HtmlFormatter
 
             formatter = HtmlFormatter(noclasses=True, style=_code_style, full=True)
-            return highlight(content, lexer, formatter)
+            return str(highlight(content, lexer, formatter))
         except Exception:
             return f"<pre>{content}</pre>"

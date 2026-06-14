@@ -27,7 +27,7 @@ def _highlight_code(code: str, lang: str, _attrs: str) -> str:
     except ClassNotFound:
         return ""
     formatter = HtmlFormatter(noclasses=True, style=_code_style)
-    return highlight(code, lexer, formatter)
+    return str(highlight(code, lexer, formatter))
 
 
 _md = MarkdownIt("commonmark", {"highlight": _highlight_code})

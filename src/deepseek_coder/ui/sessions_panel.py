@@ -50,11 +50,16 @@ class SessionsPanel(QWidget):
             item.setData(Qt.ItemDataRole.UserRole, session.id)
             self._list.addItem(item)
 
-    def contextMenuEvent(self, event: QContextMenuEvent) -> None:
+    def contextMenuEvent(self, event: QContextMenuEvent | None) -> None:
         """Контекстное меню по правой кнопке - удаление сессии."""
-        item = self._list.itemAt(self._list.viewport().mapFromGlobal(event.globalPos()))
+        if event is None:
+            return None
+        viewport = self._list.viewport()
+        if viewport is None:
+            return None
+        item = self._list.itemAt(viewport.mapFromGlobal(event.globalPos()))
         if item is None:
-            return
+            return None
         menu = QMenu(self)
         deleted_action = menu.addAction("🗑 Удалить")
         chosen = menu.exec(event.globalPos())
