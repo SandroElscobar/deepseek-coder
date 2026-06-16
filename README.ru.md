@@ -32,7 +32,7 @@ Desktop AI coding assistant powered by [DeepSeek API](https://platform.deepseek.
 
 ```bash
 # 1. Клонировать репозиторий
-git clone https://github.com/your-username/deepseek-coder.git
+git clone https://github.com/SandroElscobar/deepseek-coder.git
 cd deepseek-coder
 
 # 2. Установить зависимости
