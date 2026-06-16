@@ -32,7 +32,7 @@ An open-source alternative to Claude Code / Cursor — local, no subscription re
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/deepseek-coder.git
+git clone https://github.com/SandroElscobar/deepseek-coder.git
 cd deepseek-coder
 
 # 2. Install dependencies
